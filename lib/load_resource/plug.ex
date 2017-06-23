@@ -1,6 +1,8 @@
-defmodule CommonplaceFeeds.LoadResource do
+defmodule LoadResource.Plug do
   import Plug.Conn
   import Ecto.Query
+
+  @repo Application.get_env(:load_resource, :repo)
 
   def init(default_options) do
     options = Enum.into(default_options, %{})
@@ -27,7 +29,7 @@ defmodule CommonplaceFeeds.LoadResource do
     #   base_query
     # end
 
-    resource = CommonplaceFeeds.Repo.one(base_query)
+    resource = @repo.one(base_query)
 
     if resource do
       assign(conn, resource_name, resource)
