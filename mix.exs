@@ -23,7 +23,8 @@ defmodule Postgrex.Mixfile do
   defp deps do
     [
       {:plug, "~> 1.3"},
-      {:ecto, "~> 2.1"}
+      {:ecto, "~> 2.1"},
+      {:ex_doc, "~> 0.14", only: :dev}
     ]
   end
 
