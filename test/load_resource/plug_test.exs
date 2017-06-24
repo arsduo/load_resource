@@ -8,6 +8,20 @@ defmodule LoadResource.PlugTest do
 
   @default_opts [model: TestModel, handler: &TestErrorHandler.not_found/2]
 
+  def assert_query_equality(query, expected_query) do
+    # we need to compare these two queries without caring about the particular files that
+    # triggered them
+    # This is terrible.
+    remove_files_from_query = fn(query) ->
+      query = Map.from_struct(query)
+      wheres = query[:wheres]
+      cleansed_wheres = Enum.map(wheres, fn(clause) -> Map.drop(clause, [:file, :line]) end)
+      Map.put(query, :wheres, cleansed_wheres)
+    end
+
+    assert remove_files_from_query.(query) == remove_files_from_query.(expected_query)
+  end
+
   describe "init" do
     test "processes the options properly, processing the resource_name" do
       opts = LoadResource.Plug.init(@default_opts)
@@ -53,16 +67,7 @@ defmodule LoadResource.PlugTest do
     test "looks up the query appropriately", %{conn: conn} do
       query = TestRepo.last_query
       expected_query = from row in TestModel, where: row.id == ^(123)
-      # we need to compare these two queries without caring about the particular files that
-      # triggered them
-      # This is terrible.
-      remove_files_from_query = fn(query) ->
-        query = Map.from_struct(query)
-        wheres = query[:wheres]
-        Map.put(query, :wheres, Enum.map(wheres, fn(clause) -> Map.drop(clause, [:file, :line]) end))
-      end
-
-      assert remove_files_from_query.(query) == remove_files_from_query.(expected_query)
+      assert_query_equality(query, expected_query)
     end
 
     test "assigns the result to the appropriate key", %{conn: conn, model: model} do
