@@ -36,7 +36,7 @@ defmodule LoadResource.Plug do
     if resource do
       assign(conn, resource_name, resource)
     else
-      handler.(conn, %{"id" => id})
+      handler.(conn, id)
       |> halt
     end
   end

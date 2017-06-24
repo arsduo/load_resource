@@ -24,7 +24,7 @@ defmodule TestRepo do
     send self(), {@response_key, result}
   end
 
-  def last_result do
+  def last_query do
     receive do
       {@lookup_key, query} -> query
     after

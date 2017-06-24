@@ -3,8 +3,8 @@ defmodule TestErrorHandler do
   A test error handler.
   """
 
-  def not_found(conn, data) do
+  def not_found(conn, id) do
     conn
-    |> Plug.Conn.put_private(:not_found, data)
+    |> Plug.Conn.send_resp(404, "not_found #{id}")
   end
 end
