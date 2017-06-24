@@ -1,27 +1,31 @@
-defmodule LoadResource.TestHelper do
-  @doc """
-  Helper for running a plug, copied from https://github.com/ueberauth/guardian/blob/master/test/test_helper.exs#L31.
-
-  Calls the plug module's `init/1` function with
-  no arguments and passes the results to `call/2`
-  as the second argument.
-  """
-  def run_plug(conn, plug_module) do
-    opts = apply(plug_module, :init, [])
-    apply(plug_module, :call, [conn, opts])
+# Include any test files from the support directory.
+Enum.map File.ls!("test/support"), fn(file) ->
+  if Regex.match?(~r/\.exs$/, file) do
+    Code.require_file("test/support/#{file}")
   end
 end
 
-defmodule LoadResource.TestRepo do
-  use Ecto.Repo, otp_app: :load_resource
-end
+defmodule TestHelper do
+  use Plug.Test
 
-defmodule LoadResource.TestModel do
-  use Ecto.Schema
+  @doc """
+  A helper for getting a connection with the params loaded.
+  """
+  def plug_with_fetched_params(params \\ nil) do
+    :get
+    |> conn("/", params)
+    |> Plug.Conn.fetch_query_params
+  end
 
-  schema "books" do
-    field :title, :string
-    field :isbn, :string
+  @doc """
+  A helper for running a plug, modified from https://github.com/ueberauth/guardian/blob/master/test/test_helper.exs#L31.
+
+  Calls the plug module's `init/1` function with no arguments and passes the results to `call/2` as
+  the second argument.
+  """
+  def run_plug(conn, plug_module, initial_options) do
+    options = apply(plug_module, :init, [initial_options])
+    apply(plug_module, :call, [conn, options])
   end
 end
 

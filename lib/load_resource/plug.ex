@@ -18,7 +18,9 @@ defmodule LoadResource.Plug do
     Map.put(options, :resource_name, resource_name)
   end
 
-  def call(conn, %{check_auth: check_auth, id_key: id_key, model: model, handler: handler, resource_name: resource_name}) do
+  def call(conn, %{model: model, handler: handler, resource_name: resource_name} = options) do
+    id_key = options[:id_key] || "id"
+
     id = conn.params[id_key]
     # user = Guardian.Plug.current_resource(conn)
 
