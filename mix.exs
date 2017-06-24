@@ -1,4 +1,4 @@
-defmodule Postgrex.Mixfile do
+defmodule LoadResource.Mixfile do
   use Mix.Project
 
   def project do
@@ -17,7 +17,8 @@ defmodule Postgrex.Mixfile do
   end
 
   def application do
-    []
+    # These are neceessary to run our tests
+    [applications: [:ecto]]
   end
 
   defp deps do
