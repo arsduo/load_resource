@@ -59,12 +59,13 @@ defmodule LoadResource.PlugTest do
   describe "call with a result" do
     setup do
       model = %{"a" => "model", of: "something"}
+      id = 123
       TestRepo.enqueue_result(model)
-      conn = plug_with_fetched_params(%{"id" => 123})
-      {:ok, %{model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts)}}
+      conn = plug_with_fetched_params(%{"id" => id})
+      {:ok, %{id: id, model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts)}}
     end
 
-    test "looks up the query appropriately", %{conn: conn} do
+    test "makes an appropriate query", %{conn: conn} do
       query = TestRepo.last_query
       expected_query = from row in TestModel, where: row.id == ^(123)
       assert_query_equality(query, expected_query)
@@ -72,6 +73,24 @@ defmodule LoadResource.PlugTest do
 
     test "assigns the result to the appropriate key", %{conn: conn, model: model} do
       assert conn.assigns[:test_model] == model
+    end
+  end
+
+  describe "call with a different ID param" do
+    setup do
+      model = %{"a" => "model", of: "something"}
+      id = 123
+      TestRepo.enqueue_result(model)
+      conn = plug_with_fetched_params(%{"resource_id" => id})
+      {:ok, %{id: id, model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [id_key: "resource_id"])}}
+    end
+
+    test "makes an appropriate query", %{id: id} do
+      query = TestRepo.last_query
+      # The query should still be the same, since we've fetched the ID just from a different param
+      expected_query = from row in TestModel, where: row.id == ^(123)
+
+      assert_query_equality(query, expected_query)
     end
   end
 end
