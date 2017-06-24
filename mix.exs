@@ -25,7 +25,8 @@ defmodule LoadResource.Mixfile do
     [
       {:plug, "~> 1.3"},
       {:ecto, "~> 2.1"},
-      {:ex_doc, "~> 0.14", only: :dev}
+      {:ex_doc, "~> 0.14", only: :dev},
+      {:credo, "~> 0.8.1", only: [:dev, :test]}
     ]
   end
 

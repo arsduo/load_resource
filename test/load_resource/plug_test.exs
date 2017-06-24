@@ -65,9 +65,9 @@ defmodule LoadResource.PlugTest do
       {:ok, %{id: id, model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts)}}
     end
 
-    test "makes an appropriate query", %{conn: conn} do
+    test "makes an appropriate query", %{id: id} do
       query = TestRepo.last_query
-      expected_query = from row in TestModel, where: row.id == ^(123)
+      expected_query = from row in TestModel, where: row.id == ^(id)
       assert_query_equality(query, expected_query)
     end
 
@@ -88,7 +88,7 @@ defmodule LoadResource.PlugTest do
     test "makes an appropriate query", %{id: id} do
       query = TestRepo.last_query
       # The query should still be the same, since we've fetched the ID just from a different param
-      expected_query = from row in TestModel, where: row.id == ^(123)
+      expected_query = from row in TestModel, where: row.id == ^(id)
 
       assert_query_equality(query, expected_query)
     end

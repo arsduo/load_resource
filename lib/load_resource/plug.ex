@@ -1,4 +1,8 @@
 defmodule LoadResource.Plug do
+  @moduledoc """
+  This plug allows you to do some things.
+  """
+
   import Plug.Conn
   import Ecto.Query
 
@@ -36,7 +40,8 @@ defmodule LoadResource.Plug do
     if resource do
       assign(conn, resource_name, resource)
     else
-      handler.(conn, id)
+      conn
+      |> handler.(id)
       |> halt
     end
   end
