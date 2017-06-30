@@ -8,11 +8,18 @@ defmodule LoadResource.Mixfile do
       elixir: "~> 1.0",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      description: description(),
       package: package(),
       deps: deps(),
+
+      # Docs
       name: "LoadResource",
-      source_url: "https://github.com/arsduo/load_resource"
+      description: description(),
+      source_url: "https://github.com/arsduo/load_resource",
+      homepage_url: "https://github.com/arsduo/load_resource",
+      docs: [
+        main: "LoadResource.Plug",
+        extras: ["README.md"]
+      ]
     ]
   end
 
