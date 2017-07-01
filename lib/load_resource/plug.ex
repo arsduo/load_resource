@@ -10,7 +10,7 @@ defmodule LoadResource.Plug do
   @repo Application.get_env(:load_resource, :repo)
 
   def init(default_options) do
-    options = Enum.into(default_options, %{})
+    options = Enum.into(default_options, %{required: true})
 
     # In order to allow us to load multiple resource for one controller, we need to have unique
     # names for the value that gets stored on conn. To do that, we generate the name of the
@@ -34,14 +34,22 @@ defmodule LoadResource.Plug do
 
     query = LoadResource.QueryBuilder.build(model, conn, [id_scope] ++ scopes)
 
-    resource = @repo.one(query)
+    query
+    |> @repo.one
+    |> handle_resource(conn, options)
+  end
 
-    if resource do
-      assign(conn, resource_name, resource)
-    else
-      conn
-      |> handler.(id_scope.value.(conn))
-      |> halt
-    end
+  defp handle_resource(nil, conn, %{required: true, handler: handler}) do
+    conn
+    |> handler.()
+    |> halt
+  end
+
+  defp handle_resource(nil, conn, _options) do
+    conn
+  end
+
+  defp handle_resource(resource, conn, %{resource_name: resource_name}) do
+    assign(conn, resource_name, resource)
   end
 end

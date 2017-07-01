@@ -9,7 +9,7 @@ defmodule LoadResource.PlugTest do
 
   alias LoadResource.Scope
 
-  @default_opts [model: TestModel, handler: &TestErrorHandler.not_found/2]
+  @default_opts [model: TestModel, handler: &TestErrorHandler.not_found/1]
 
   describe "init" do
     test "processes the options properly, processing the resource_name" do
@@ -17,7 +17,8 @@ defmodule LoadResource.PlugTest do
       assert opts == %{
         model: TestModel,
         resource_name: :test_model,
-        handler: &TestErrorHandler.not_found/2
+        handler: &TestErrorHandler.not_found/1,
+        required: true
       }
     end
 
@@ -28,7 +29,7 @@ defmodule LoadResource.PlugTest do
     end
   end
 
-  describe "call with no result" do
+  describe "call with no result and required: true (default)" do
     setup do
       TestRepo.enqueue_result(nil)
       id = 123
@@ -42,6 +43,27 @@ defmodule LoadResource.PlugTest do
 
     test "it runs the conn through the error handler's not_found", %{conn: conn, id: id} do
       assert conn.resp_body == "not_found #{id}"
+    end
+  end
+
+  describe "call with no result and required: false" do
+    setup do
+      TestRepo.enqueue_result(nil)
+      id = 123
+      conn = plug_with_fetched_params(%{"id" => id})
+      {:ok, %{id: id, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [required: false])}}
+    end
+
+    test "does not halt the chain", %{conn: conn} do
+      refute conn.halted
+    end
+
+    test "does not render anything", %{conn: conn} do
+      refute conn.resp_body
+    end
+
+    test "it does not assign anything", %{conn: conn} do
+      refute conn.assigns[:test_model]
     end
   end
 
