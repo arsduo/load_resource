@@ -1,4 +1,4 @@
-defmodule LoadResource.ScopeTest do
+defmodule LoadResource.QueryBuilderTest do
   @moduledoc false
 
   use ExUnit.Case, async: true
