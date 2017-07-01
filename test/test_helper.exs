@@ -5,7 +5,10 @@ Enum.map File.ls!("test/support"), fn(file) ->
   end
 end
 
+ExUnit.start()
+
 defmodule TestHelper do
+  use ExUnit.Case, async: true
   use Plug.Test
 
   @doc """
@@ -27,6 +30,18 @@ defmodule TestHelper do
     options = apply(plug_module, :init, [initial_options])
     apply(plug_module, :call, [conn, options])
   end
-end
 
-ExUnit.start()
+  def assert_query_equality(query, expected_query) do
+    # we need to compare these two queries without caring about the particular files that
+    # triggered them
+    # This is terrible.
+    remove_files_from_query = fn(query) ->
+      query = Map.from_struct(query)
+      wheres = query[:wheres]
+      cleansed_wheres = Enum.map(wheres, fn(clause) -> Map.drop(clause, [:file, :line]) end)
+      Map.put(query, :wheres, cleansed_wheres)
+    end
+
+    assert remove_files_from_query.(query) == remove_files_from_query.(expected_query)
+  end
+end
