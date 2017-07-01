@@ -39,7 +39,7 @@ defmodule LoadResource.Mixfile do
 
   defp description do
     """
-    A lightweight plug to load and validate resources for incoming requests.
+    A lightweight, flexible plug to load and validate resources used by your app.
     """
   end
 

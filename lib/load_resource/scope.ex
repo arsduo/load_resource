@@ -6,10 +6,10 @@ defmodule LoadResource.Scope do
 
   Scopes contain two attributes:
 
-  * `foreign_key`: the column on the resource to check
-  * `accessor`: a function/1 that accepts `conn` and returns a value (see below)
+  * `column`: the column on the resource to check
+  * `value`: a function/1 that accepts `conn` and returns a value (see below)
 
-  The value returned by `accessor` can be either:
+  The value returned by `value` can be either:
 
   * a primitive (atom, string, number, or boolean), in which case it is used in the SQL query
   * a map or struct containing an `:id` key, in which case the id value is used
@@ -17,8 +17,8 @@ defmodule LoadResource.Scope do
   Any other value will result in an `LoadResource.Scope.UnprocessableValueError` being raised.
   """
 
-  @enforce_keys [:foreign_key, :accessor]
-  defstruct [:foreign_key, :accessor]
+  @enforce_keys [:column, :value]
+  defstruct [:column, :value]
 
   alias LoadResource.Scope
 
@@ -29,8 +29,8 @@ defmodule LoadResource.Scope do
 
   ```
   %Scope{
-    foreign_key: :book_id,
-    accessor: fn(conn) -> conn.assigns[:book]
+    column: :book_id,
+    value: fn(conn) -> conn.assigns[:book]
   }
   ```
 
@@ -40,27 +40,27 @@ defmodule LoadResource.Scope do
   """
   def from_atom(scope_key) when is_atom(scope_key) do
     %Scope{
-      foreign_key: :"#{scope_key}_id",
-      accessor: fn(conn) -> conn.assigns[scope_key] end
+      column: :"#{scope_key}_id",
+      value: fn(conn) -> conn.assigns[scope_key] end
     }
   end
 
   @doc """
   Run a scope on a given `conn` object and return the value for use by `LoadResource.QueryBuilder`.
 
-  If needed, this method will transform the result of the `accessor` function into an appropriate value (for instance, from a map containing an `:id` key to the appropriate value).
+  If needed, this method will transform the result of the `value` function into an appropriate value (for instance, from a map containing an `:id` key to the appropriate value).
 
   Given this scope and an `identify_source_book_id/1` function that returns either `"foo"` or `%{id: "foo"}`:
 
   ```
-  scope = %Scope{foreign_key: :source_book_id, accessor: &identify_source_book_id/1}
+  scope = %Scope{column: :source_book_id, value: &identify_source_book_id/1}
   ```
 
   `Scope.evaluate(scope)` will return "foo".
   ```
   """
-  def evaluate(%Scope{accessor: accessor}, conn) do
-    process_scope_value(accessor.(conn))
+  def evaluate(%Scope{value: value}, conn) do
+    process_scope_value(value.(conn))
   end
 
   defp process_scope_value(value) when is_atom(value), do: value

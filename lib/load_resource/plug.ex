@@ -27,8 +27,8 @@ defmodule LoadResource.Plug do
     id_key = options[:id_key] || "id"
 
     id_scope = %Scope{
-      foreign_key: :id,
-      accessor: fn(conn) -> conn.params[id_key] end
+      column: :id,
+      value: fn(conn) -> conn.params[id_key] end
     }
     scopes = options[:scopes] || []
 
@@ -40,7 +40,7 @@ defmodule LoadResource.Plug do
       assign(conn, resource_name, resource)
     else
       conn
-      |> handler.(id_scope.accessor.(conn))
+      |> handler.(id_scope.value.(conn))
       |> halt
     end
   end

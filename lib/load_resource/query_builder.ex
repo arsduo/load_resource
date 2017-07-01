@@ -2,7 +2,7 @@ defmodule LoadResource.QueryBuilder do
   @moduledoc """
   Each time a connection comes in, we build up a query using a specified set of `LoadResource.Scope`s.
 
-  Each scope representing a condition that needs to be fulfilled (looking up by ID, verifying a foreign key, checking another parameter, etc.); the QueryBuilder joins them all together into a single composite database query to be executed in the plug.
+  Each scope representing a condition that needs to be fulfilled (looking up by ID, verifying a column, checking another parameter, etc.); the QueryBuilder joins them all together into a single composite database query to be executed in the plug.
   """
 
   import Ecto.Query
@@ -17,7 +17,7 @@ defmodule LoadResource.QueryBuilder do
   Example:
 
   ```
-  scope = %Scope{foreign_key: :source_book_id, accessor: &identify_source_book_id/1}
+  scope = %Scope{column: :source_book_id, value: &identify_source_book_id/1}
   QueryBuilder.build(Quote, conn, [scope])
   # => select * from quotes where source_book_id = ${identify_source_book_id(conn)}
 
@@ -26,9 +26,9 @@ defmodule LoadResource.QueryBuilder do
   # => select * from quotes where book_id = ${conn.assigns[:book].id}
   ```
 
-  Multiple scopes can be provided (and they don't have to all be foreign keys, either):
+  Multiple scopes can be provided (and they don't have to all be columns, either):
   ```
-  scope = %Scope{foreign_key: :book_type, accessor: fn(conn) -> conn.params[:book_type] end}
+  scope = %Scope{column: :book_type, value: fn(conn) -> conn.params[:book_type] end}
   QueryBuilder.build(Quote, conn, [:book, scope])
   # => select * from quotes where book_id = ${conn.assigns[:book].id} and book_type = ${conn.params[:book_type]}
   """
@@ -44,6 +44,6 @@ defmodule LoadResource.QueryBuilder do
   end
 
   defp add_clause(query, %Scope{} = scope, conn) do
-    from query, where: ^[{scope.foreign_key, Scope.evaluate(scope, conn)}]
+    from query, where: ^[{scope.column, Scope.evaluate(scope, conn)}]
   end
 end

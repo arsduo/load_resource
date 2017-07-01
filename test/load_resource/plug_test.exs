@@ -92,7 +92,7 @@ defmodule LoadResource.PlugTest do
       TestRepo.enqueue_result(model)
 
       scope = :book
-      second_scope = %Scope{foreign_key: :book_type, accessor: fn(conn) -> conn.params["book_type"] end}
+      second_scope = %Scope{column: :book_type, value: fn(conn) -> conn.params["book_type"] end}
 
       # Set up a connection with the right params that's already been procesesd with a previous
       # resource

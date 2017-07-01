@@ -10,17 +10,17 @@ defmodule LoadResource.ScopeTest do
       assert_raise FunctionClauseError, fn() -> Scope.from_atom("booK") end
     end
 
-    test "builds a scope with the right foreign key" do
+    test "builds a scope with the right column" do
       scope = Scope.from_atom(:book)
-      assert scope.foreign_key == :book_id
+      assert scope.column == :book_id
     end
 
-    test "builds a scope with the right accessor" do
+    test "builds a scope with the right value" do
       book =  %{some: :value}
       conn = %{assigns: %{book: book}}
 
       scope = Scope.from_atom(:book)
-      assert scope.accessor.(conn) == book
+      assert scope.value.(conn) == book
     end
   end
 

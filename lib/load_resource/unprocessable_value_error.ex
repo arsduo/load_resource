@@ -10,7 +10,7 @@ defmodule LoadResource.Scope.UnprocessableValueError do
   @doc false
   def exception(value) do
     %UnprocessableValueError{
-      message: "Unable to handle result of scope accessor. Expected atom | string | %{id: id} struct.",
+      message: "Unable to handle result of scope value. Expected atom | string | %{id: id} struct.",
       value: value
     }
   end

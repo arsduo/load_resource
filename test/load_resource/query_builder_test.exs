@@ -19,7 +19,7 @@ defmodule LoadResource.ScopeTest do
     end
 
     test "will layer multiple scopes" do
-      scope = %Scope{foreign_key: :book_type, accessor: fn(conn) -> conn.params[:book_type] end}
+      scope = %Scope{column: :book_type, value: fn(conn) -> conn.params[:book_type] end}
       conn = %{params: %{book_type: "novel"}}
 
       expected_query = from row in TestModel, where: ^[{:book_type, "novel"}]
@@ -28,7 +28,7 @@ defmodule LoadResource.ScopeTest do
 
     test "layers multiple queries together" do
       scope = :book
-      second_scope = %Scope{foreign_key: :book_type, accessor: fn(conn) -> conn.params[:book_type] end}
+      second_scope = %Scope{column: :book_type, value: fn(conn) -> conn.params[:book_type] end}
       conn = %{assigns: %{book: %{id: 1234}}, params: %{book_type: "novel"}}
 
       expected_query = from row in TestModel, where: ^[{:book_id, 1234}], where: ^[{:book_type, "novel"}]
