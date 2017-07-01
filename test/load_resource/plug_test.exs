@@ -1,26 +1,15 @@
 defmodule LoadResource.PlugTest do
- @moduledoc false
+  @moduledoc false
+
   use ExUnit.Case, async: true
   use Plug.Test
 
   import Ecto.Query
   import TestHelper
 
+  alias LoadResource.Scope
+
   @default_opts [model: TestModel, handler: &TestErrorHandler.not_found/2]
-
-  def assert_query_equality(query, expected_query) do
-    # we need to compare these two queries without caring about the particular files that
-    # triggered them
-    # This is terrible.
-    remove_files_from_query = fn(query) ->
-      query = Map.from_struct(query)
-      wheres = query[:wheres]
-      cleansed_wheres = Enum.map(wheres, fn(clause) -> Map.drop(clause, [:file, :line]) end)
-      Map.put(query, :wheres, cleansed_wheres)
-    end
-
-    assert remove_files_from_query.(query) == remove_files_from_query.(expected_query)
-  end
 
   describe "init" do
     test "processes the options properly, processing the resource_name" do
@@ -89,6 +78,37 @@ defmodule LoadResource.PlugTest do
       query = TestRepo.last_query
       # The query should still be the same, since we've fetched the ID just from a different param
       expected_query = from row in TestModel, where: row.id == ^(id)
+
+      assert_query_equality(query, expected_query)
+    end
+  end
+
+  describe "call with additional scopes" do
+    setup do
+      model = %{"a" => "model", of: "something"}
+      id = 123
+      book_id = "abc"
+      book_type = "novel"
+      TestRepo.enqueue_result(model)
+
+      scope = :book
+      second_scope = %Scope{foreign_key: :book_type, accessor: fn(conn) -> conn.params["book_type"] end}
+
+      # Set up a connection with the right params that's already been procesesd with a previous
+      # resource
+      conn = %{"id" => id, "book_type" => book_type}
+             |> plug_with_fetched_params
+             |> Plug.Conn.assign(:book, %{id: book_id})
+
+      {:ok, %{id: id, book_id: book_id, book_type: book_type, model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [scopes: [scope, second_scope]])}}
+    end
+
+    test "it layers in additional scopes", %{id: id, book_id: book_id, book_type: book_type} do
+      query = TestRepo.last_query
+      expected_query = from row in TestModel,
+                          where: ^[{:id, id}],
+                          where: ^[{:book_id, book_id}],
+                          where: ^[{:book_type, book_type}]
 
       assert_query_equality(query, expected_query)
     end

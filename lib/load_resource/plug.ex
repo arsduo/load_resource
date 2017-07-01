@@ -4,7 +4,8 @@ defmodule LoadResource.Plug do
   """
 
   import Plug.Conn
-  import Ecto.Query
+
+  alias LoadResource.Scope
 
   @repo Application.get_env(:load_resource, :repo)
 
@@ -25,23 +26,21 @@ defmodule LoadResource.Plug do
   def call(conn, %{model: model, handler: handler, resource_name: resource_name} = options) do
     id_key = options[:id_key] || "id"
 
-    id = conn.params[id_key]
-    # user = Guardian.Plug.current_resource(conn)
+    id_scope = %Scope{
+      foreign_key: :id,
+      accessor: fn(conn) -> conn.params[id_key] end
+    }
+    scopes = options[:scopes] || []
 
-    base_query = from row in model, where: row.id == ^(id)
-    # query = if check_auth do
-    #   from row in base_query, where: row.user_id == ^(user.id)
-    # else
-    #   base_query
-    # end
+    query = LoadResource.QueryBuilder.build(model, conn, [id_scope] ++ scopes)
 
-    resource = @repo.one(base_query)
+    resource = @repo.one(query)
 
     if resource do
       assign(conn, resource_name, resource)
     else
       conn
-      |> handler.(id)
+      |> handler.(id_scope.accessor.(conn))
       |> halt
     end
   end
