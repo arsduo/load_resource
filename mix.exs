@@ -47,9 +47,9 @@ defmodule LoadResource.Mixfile do
     # These are the default files included in the package
     [
       name: :load_resource,
-      files: ["lib", "priv", "mix.exs", "README*", "readme*", "LICENSE*", "license*"],
+      files: ["lib", "priv", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["Alex Koppel"],
-      licenses: ["Apache 2.0"],
+      licenses: ["MIT License"],
       links: %{"GitHub" => "https://github.com/arsduo/load_resource"}
     ]
   end
