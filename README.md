@@ -1,4 +1,4 @@
-_A lightweight, flexible plug for loading and validating resources_
+_A lightweight, flexible plug for loading and validating resources._
 
 If you've written a web application, you've almost certainly run into this scenario: a user requests a resource and you need to make sure that they can access it. It could be students and essays, customers and orders, books and quotes, whatever. It's a universal need.
 
@@ -19,7 +19,7 @@ LoadResource makes that easy for Phoenix apps and any other Elixir projects usin
 * Lightweight: no dependencies beyond Ecto
 * Flexible: straightforward options make it easy to handle many common cases
 * Tested: fully tested in ExUnit and linted by [Credo](https://github.com/rrrene/credo)
-* Documented: fully documented in ExDoc
+* Documented: [fully documented on hex.pm](https://hexdocs.pm/load_resource/0.1.0)
 
 Feedback or pull requests for additional configuration very welcome! See below.
 
@@ -29,7 +29,6 @@ Add LoadResource to your `mix.exs`:
 
 ```
 {:load_resource, "~> 0.1.0"}
-
 ```
 
 Update your `config.exs` to tell LoadResource which Ecto repo to use:
@@ -62,7 +61,7 @@ If that succeeds, we want to check for a quote scoped to that book’s data. Tha
 plug LoadResource.Plug, [model: Quote, scopes: [:book], not_found: &MyErrorHandler.not_found/1]
 ```
 
-LoadResource makes it straightforward to chain resource plugs in the same controller. If you pass in a scope that's an atom, the package will use the results of a previous LoadResource plug (e.g. `conn.assigns[:book]`) to check against the Quote’s :book_id column.
+LoadResource makes it straightforward to chain resource plugs in the same controller. If you pass in a scope that's an atom, the package will use the results of a previous LoadResource plug (e.g. `conn.assigns[:book]`) to check against the Quote’s `book_id` column.
 
 ### Scopes
 
@@ -81,25 +80,34 @@ So, for instance, if you use [Guardian](https://github.com/ueberauth/guardian) f
 ```elixir
 alias LoadResource.Scope
 
-plug LoadResource.Plug, [model: Book, scopes: [%Scope{column: :user_id, value: &Guardian.Plug.current/resource/1}], not_found: &MyErrorHandler.not_found/1]
+plug LoadResource.Plug, [
+  model: Book, 
+  scopes: [%Scope{column: :user_id, value: &Guardian.Plug.current_resource/1}], 
+  not_found: &MyErrorHandler.not_found/1
+]
 ```
 
 Or if you want to validate another parameter in the request matches up:
 
 ```elixir
 scope = %Scope{column: :book_type, value: fn(conn) -> conn.params[:book_type] end}]
-plug LoadResource.Plug, [model: Book, scopes: [scope], not_found: MyErrorHandler.not_found/1]
+
+plug LoadResource.Plug, [
+  model: Book, 
+  scopes: [scope], 
+  not_found: MyErrorHandler.not_found/1
+]
 ```
 
 ### Accepted Options
 
 LoadResource.Plug takes the following options:
 
-* model: an Ecto model representing the resource you want to load (required)
-* not_found: a function/1 that gets called if the record can't be found and `required: true` (required)
-* id_key: what param in the incoming request represents the ID of the record (optional, default: "id")
-* required: whether to halt the plug pipeline and return an error response if the record can't be found (optional, default: true)
-* scopes: an list of` :atom`s and/or `Scope`s as described above (optional, default: [])
+* `model`: an Ecto model representing the resource you want to load (required)
+* `not_found`: a function/1 that gets called if the record can't be found and `required: true` (required)
+* `id_key`: what param in the incoming request represents the ID of the record (optional, default: "id")
+* `required`: whether to halt the plug pipeline and return an error response if the record can't be found (optional, default: true)
+* `scopes`: an list of` :atom`s and/or `Scope`s as described above (optional, default: [])
 
 ## Known Limitations
 
