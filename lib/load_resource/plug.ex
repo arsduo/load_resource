@@ -1,6 +1,36 @@
 defmodule LoadResource.Plug do
   @moduledoc """
-  This plug allows you to do some things.
+  This plug allows you to specify resources that your app should load and (optionally) validate as part of a request.
+
+  ## Examples
+
+  Load a Book resource using the `id` param on the incoming request:
+
+  ```
+  plug LoadResource.Plug, [model: Book, not_found: &MyErrorHandler.not_found/1]
+  ```
+
+  Use the `book_id` param instead of `id` (useful when composing multiple resources):
+
+  ```
+  plug LoadResource.Plug, [model: Book, id_key: "book_id", not_found: &MyErrorHandler.not_found/1]
+  ```
+
+  Load a Quote that matches to a previously loaded Book:
+
+  ```
+  plug LoadResource.Plug, [model: Quote, scopes: [:book], not_found: &MyErrorHandler.not_found/1]
+  ```
+
+  (See `LoadResource.Scope` for more information on scopes.)
+
+  ## Accepted Options
+
+  * `model`: an Ecto model representing the resource you want to load (required)
+  * `not_found`: a function/1 that gets called if the record can't be found and `required: true` (required)
+  * `id_key`: what param in the incoming request represents the ID of the record (optional, default: "id")
+  * `required`: whether to halt the plug pipeline and return an error response if the record can't be found (optional, default: true)
+  * `scopes`: an list of atoms and/or `LoadResource.Scope` structs (optional, default: [])
   """
 
   import Plug.Conn
@@ -9,6 +39,9 @@ defmodule LoadResource.Plug do
 
   @repo Application.get_env(:load_resource, :repo)
 
+  @doc """
+  Initialize the plug with any options provided in the controller or pipeline, including calculating the resource_name (which key will written to in `conn.assigns`) from the model.
+  """
   def init(default_options) do
     options = Enum.into(default_options, %{required: true})
 
@@ -23,6 +56,9 @@ defmodule LoadResource.Plug do
     Map.put(options, :resource_name, resource_name)
   end
 
+  @doc """
+  Load a resource for a given request based on the previously-provided options.
+  """
   def call(conn, %{model: model, handler: handler, resource_name: resource_name} = options) do
     id_key = options[:id_key] || "id"
 
