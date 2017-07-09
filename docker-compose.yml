@@ -6,20 +6,9 @@ services:
     build: .
     ports:
      - 4000:4000
-    external_links:
-     - load_resource_db
-    depends_on:
-     - load_resource_db
     volumes:
      - .:/usr/src/app
     # allow attaching directly to the container, for debugging
     # see http://stackoverflow.com/questions/35211638/how-to-debug-a-rails-app-in-docker-with-pry
     tty: true
     stdin_open: true
-
-  load_resource_db:
-    image: postgres
-    env_file:
-     - development.env
-    volumes:
-      - ./postgres:/var/lib/postgresql
