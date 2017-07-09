@@ -11,6 +11,8 @@ defmodule LoadResource.Mixfile do
       package: package(),
       deps: deps(),
 
+      elixirc_paths: elixirc_paths(Mix.env),
+
       # Docs
       name: "LoadResource",
       description: description(),
@@ -47,10 +49,15 @@ defmodule LoadResource.Mixfile do
     # These are the default files included in the package
     [
       name: :load_resource,
-      files: ["lib", "priv", "mix.exs", "README*", "LICENSE*"],
+      files: ["lib", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["Alex Koppel"],
       licenses: ["MIT License"],
       links: %{"GitHub" => "https://github.com/arsduo/load_resource"}
     ]
   end
+
+  # When running in test, include the test repo and other support files
+  # See https://stackoverflow.com/questions/39146331/how-load-files-in-a-path-different-than-lib-elixir
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_),     do: ["lib"]
 end

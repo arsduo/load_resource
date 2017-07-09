@@ -81,8 +81,8 @@ So, for instance, if you use [Guardian](https://github.com/ueberauth/guardian) f
 alias LoadResource.Scope
 
 plug LoadResource.Plug, [
-  model: Book, 
-  scopes: [%Scope{column: :user_id, value: &Guardian.Plug.current_resource/1}], 
+  model: Book,
+  scopes: [%Scope{column: :user_id, value: &Guardian.Plug.current_resource/1}],
   not_found: &MyErrorHandler.not_found/1
 ]
 ```
@@ -93,8 +93,8 @@ Or if you want to validate another parameter in the request matches up:
 scope = %Scope{column: :book_type, value: fn(conn) -> conn.params[:book_type] end}]
 
 plug LoadResource.Plug, [
-  model: Book, 
-  scopes: [scope], 
+  model: Book,
+  scopes: [scope],
   not_found: MyErrorHandler.not_found/1
 ]
 ```
@@ -132,3 +132,15 @@ Feedback and bugs reports are very welcome! Feel free to open a Github issue if 
 Please note that this project is released with a Contributor Code of Conduct. By participating in
 this project you agree to abide by its terms. See
 [code_of_conduct.md](https://github.com/arsduo/load_resource/blob/master/CODE_OF_CONDUCT.md) for more information.
+
+### Docker Setup
+
+LoadResource uses Docker to ensure a consistent development environment. Once you have [Docker
+installed](https://docs.docker.com/engine/installation/), just run `docker-compose run
+load_resource bash`. This will compile the environment and put you in a bash shell in which you can
+run `mix test`, access `iex`, etc.
+
+Any changes you make to files will show up in the Docker environment automatically, though if you
+change package dependencies or the Docker configuration itself, you'll need to exit Docker and run
+`docker-compose build` to rebuild the image.
+

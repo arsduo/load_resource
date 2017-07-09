@@ -1,0 +1,14 @@
+version: '3.0'
+
+services:
+  load_resource:
+    container_name: load_resource
+    build: .
+    ports:
+     - 4000:4000
+    volumes:
+     - .:/usr/src/app
+    # allow attaching directly to the container, for debugging
+    # see http://stackoverflow.com/questions/35211638/how-to-debug-a-rails-app-in-docker-with-pry
+    tty: true
+    stdin_open: true
