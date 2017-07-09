@@ -10,8 +10,6 @@ services:
      - load_resource_db
     depends_on:
      - load_resource_db
-    env_file:
-     - development.env
     volumes:
      - .:/usr/src/app
     # allow attaching directly to the container, for debugging
