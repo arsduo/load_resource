@@ -1,12 +1,3 @@
-IO.puts "Starting cx"
-Application.ensure_all_started(:connection)
-IO.puts "Starting ecto"
-Application.ensure_all_started(:ecto)
-IO.puts "Starting postgrex"
-Application.ensure_all_started(:postgrex)
-IO.puts "Started"
-Application.ensure_all_started(:load_resource)
-
 # Include any test files from the support directory.
 Enum.map File.ls!("test/support"), fn(file) ->
   if Regex.match?(~r/\.exs$/, file) do
