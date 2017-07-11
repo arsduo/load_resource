@@ -26,14 +26,7 @@ defmodule LoadResource.Mixfile do
   end
 
   def application do
-    # In the test environment, we want to load up a full application; when used by other
-    # applications we don't need that.
-    apps = case Mix.env do
-      :test -> [:ecto, :postgrex, :connection]
-      _ -> [:ecto]
-    end
-
-    [mod: {LoadResource, []}, applications: apps]
+    [mod: {LoadResource, []}, applications: []]
   end
 
   defp deps do
