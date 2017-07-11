@@ -26,7 +26,7 @@ defmodule LoadResource.Mixfile do
   end
 
   def application do
-    [mod: {LoadResource, []}, applications: []]
+    [mod: {LoadResource, []}]
   end
 
   defp deps do
