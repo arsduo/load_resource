@@ -4,7 +4,7 @@ defmodule LoadResource.Mixfile do
   def project do
     [
       app: :load_resource,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.0",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
@@ -26,15 +26,22 @@ defmodule LoadResource.Mixfile do
   end
 
   def application do
-    # These are neceessary to run our tests
-    [applications: [:ecto]]
+    # In the test environment, we want to load up a full application; when used by other
+    # applications we don't need that.
+    apps = case Mix.env do
+      :test -> [:ecto, :postgrex, :connection]
+      _ -> [:ecto]
+    end
+
+    [mod: {LoadResource, []}, applications: apps]
   end
 
   defp deps do
     [
       {:plug, "~> 1.3"},
       {:ecto, "~> 2.1"},
-      {:ex_doc, "~> 0.14", only: :dev},
+      {:postgrex, "~> 0.11", only: [:dev, :test]},
+      {:ex_doc, "~> 0.14", only: [:dev, :test]},
       {:credo, "~> 0.8.1", only: [:dev, :test]}
     ]
   end

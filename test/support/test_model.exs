@@ -3,6 +3,7 @@ defmodule TestModel do
 
   schema "books" do
     field :title, :string
-    field :isbn, :string
+    field :user_id, :integer
+    field :publisher, :string
   end
 end

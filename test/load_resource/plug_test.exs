@@ -4,12 +4,17 @@ defmodule LoadResource.PlugTest do
   use ExUnit.Case, async: true
   use Plug.Test
 
-  import Ecto.Query
   import TestHelper
 
   alias LoadResource.Scope
 
   @default_opts [model: TestModel, handler: &TestErrorHandler.not_found/1]
+
+  def create_model do
+    on_exit "clean up models", fn() -> TestRepo.delete_all(TestModel) end
+    {:ok, model} = TestRepo.insert(%TestModel{title: "Foo Bar", user_id: 123, publisher: "C00l B00ks"})
+    model
+  end
 
   describe "init" do
     test "processes the options properly, processing the resource_name" do
@@ -31,7 +36,6 @@ defmodule LoadResource.PlugTest do
 
   describe "call with no result and required: true (default)" do
     setup do
-      TestRepo.enqueue_result(nil)
       id = 123
       conn = plug_with_fetched_params(%{"id" => id})
       {:ok, %{id: id, conn: run_plug(conn, LoadResource.Plug, @default_opts)}}
@@ -48,10 +52,8 @@ defmodule LoadResource.PlugTest do
 
   describe "call with no result and required: false" do
     setup do
-      TestRepo.enqueue_result(nil)
-      id = 123
-      conn = plug_with_fetched_params(%{"id" => id})
-      {:ok, %{id: id, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [required: false])}}
+      conn = plug_with_fetched_params(%{"id" => 123})
+      {:ok, %{conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [required: false])}}
     end
 
     test "does not halt the chain", %{conn: conn} do
@@ -69,70 +71,65 @@ defmodule LoadResource.PlugTest do
 
   describe "call with a result" do
     setup do
-      model = %{"a" => "model", of: "something"}
-      id = 123
-      TestRepo.enqueue_result(model)
-      conn = plug_with_fetched_params(%{"id" => id})
-      {:ok, %{id: id, model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts)}}
+      model = create_model()
+      conn = plug_with_fetched_params(%{"id" => model.id})
+      {:ok, %{model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts)}}
     end
 
-    test "makes an appropriate query", %{id: id} do
-      query = TestRepo.last_query
-      expected_query = from row in TestModel, where: row.id == ^(id)
-      assert_query_equality(query, expected_query)
-    end
-
-    test "assigns the result to the appropriate key", %{conn: conn, model: model} do
+    test "loads the book", %{conn: conn, model: model} do
       assert conn.assigns[:test_model] == model
     end
   end
 
   describe "call with a different ID param" do
     setup do
-      model = %{"a" => "model", of: "something"}
-      id = 123
-      TestRepo.enqueue_result(model)
-      conn = plug_with_fetched_params(%{"resource_id" => id})
-      {:ok, %{id: id, model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [id_key: "resource_id"])}}
+      model = create_model()
+      conn = plug_with_fetched_params(%{"resource_id" => model.id})
+      {:ok, %{model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [id_key: "resource_id"])}}
     end
 
-    test "makes an appropriate query", %{id: id} do
-      query = TestRepo.last_query
-      # The query should still be the same, since we've fetched the ID just from a different param
-      expected_query = from row in TestModel, where: row.id == ^(id)
-
-      assert_query_equality(query, expected_query)
+    test "makes an appropriate query", %{conn: conn, model: model} do
+      assert conn.assigns[:test_model] == model
     end
   end
 
-  describe "call with additional scopes" do
+  describe "call with additional scopes that succeeds" do
     setup do
-      model = %{"a" => "model", of: "something"}
-      id = 123
-      book_id = "abc"
-      book_type = "novel"
-      TestRepo.enqueue_result(model)
-
-      scope = :book
-      second_scope = %Scope{column: :book_type, value: fn(conn) -> conn.params["book_type"] end}
+      model = create_model()
+      scope = :user
+      second_scope = %Scope{column: :publisher, value: fn(_conn) -> "C00l B00ks" end}
 
       # Set up a connection with the right params that's already been procesesd with a previous
       # resource
-      conn = %{"id" => id, "book_type" => book_type}
+      conn = %{"id" => model.id}
              |> plug_with_fetched_params
-             |> Plug.Conn.assign(:book, %{id: book_id})
+             |> Plug.Conn.assign(:user, %{id: model.user_id})
 
-      {:ok, %{id: id, book_id: book_id, book_type: book_type, model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [scopes: [scope, second_scope]])}}
+      {:ok, %{model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [scopes: [scope, second_scope]])}}
     end
 
-    test "it layers in additional scopes", %{id: id, book_id: book_id, book_type: book_type} do
-      query = TestRepo.last_query
-      expected_query = from row in TestModel,
-                          where: ^[{:id, id}],
-                          where: ^[{:book_id, book_id}],
-                          where: ^[{:book_type, book_type}]
+    test "it works with scopes", %{model: model, conn: conn} do
+      assert conn.assigns[:test_model] == model
+    end
+  end
 
-      assert_query_equality(query, expected_query)
+  describe "call with a scope that fails" do
+    setup do
+      model = create_model()
+      scope = :user
+      second_scope = %Scope{column: :publisher, value: fn(_conn) -> "C00l B00ks" end}
+
+      # Set up a connection with the right params that's already been procesesd with a previous
+      # resource
+      conn = %{"id" => model.id}
+             |> plug_with_fetched_params
+             |> Plug.Conn.assign(:user, %{id: 1})
+
+      {:ok, %{model: model, conn: run_plug(conn, LoadResource.Plug, @default_opts ++ [scopes: [scope, second_scope]])}}
+    end
+
+    test "it fails to load the data", %{conn: conn} do
+      refute conn.assigns[:test_model]
     end
   end
 end
