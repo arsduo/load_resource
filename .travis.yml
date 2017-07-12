@@ -2,6 +2,7 @@ sudo: required
 
 services:
   - docker
+  - postgresql
 
 language: elixir
 elixir:
@@ -10,6 +11,8 @@ elixir:
 before_install:
   - docker build -t arsduo/load_resource .
   - docker ps -a
+  - docker run arsduo/load_resource /bin/sh -c "mix ecto.create"
+  - docker run arsduo/load_resource /bin/sh -c "mix ecto.migrate"
   - docker run arsduo/load_resource /bin/sh -c "mix test"
 
 script:
