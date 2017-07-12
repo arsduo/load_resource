@@ -11,7 +11,7 @@ elixir:
 before_install:
   - docker build -t arsduo/load_resource .
   - docker ps -a
-  - docker run arsduo/load_resource /bin/sh -c "mix ecto.create"
+  - docker run arsduo/load_resource /bin/sh -c "MIX_ENV=test mix ecto.create"
   - docker run arsduo/load_resource /bin/sh -c "mix ecto.migrate"
   - docker run arsduo/load_resource /bin/sh -c "mix test"
 
