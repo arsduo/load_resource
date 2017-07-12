@@ -11,7 +11,7 @@ defmodule LoadResource.Mixfile do
       package: package(),
       deps: deps(),
 
-      elixirc_paths: elixirc_paths(Mix.env),
+      elixirc_paths: ["lib"],
 
       # Docs
       name: "LoadResource",
@@ -26,7 +26,7 @@ defmodule LoadResource.Mixfile do
   end
 
   def application do
-    [mod: {LoadResource, []}]
+    []
   end
 
   defp deps do
@@ -55,9 +55,4 @@ defmodule LoadResource.Mixfile do
       links: %{"GitHub" => "https://github.com/arsduo/load_resource"}
     ]
   end
-
-  # When running in test, include the test repo and other support files
-  # See https://stackoverflow.com/questions/39146331/how-load-files-in-a-path-different-than-lib-elixir
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
 end
