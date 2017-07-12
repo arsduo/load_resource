@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/arsduo/load_resource.svg?branch=master)](https://travis-ci.org/arsduo/load_resource)
+
 _A lightweight, flexible plug for loading and validating resources._
 
 If you've written a web application, you've almost certainly run into this scenario: a user requests a resource and you need to make sure that they can access it. It could be students and essays, customers and orders, books and quotes, whatever. It's a universal need.
