@@ -14,8 +14,8 @@ config :load_resource, ecto_repos: [TestRepo]
 # These get picked up from Docker.
 config :load_resource, TestRepo,
   adapter: Ecto.Adapters.Postgres,
-  hostname: System.get_env("PG_HOST") || "localhost",
-  username: System.get_env("PG_USER") || "postgres",
+  hostname: System.get_env("PG_HOST"),
+  username: System.get_env("PG_USER"),
   password: System.get_env("PG_PASS"),
   database: "load_resource_db",
   pool_size: 10
