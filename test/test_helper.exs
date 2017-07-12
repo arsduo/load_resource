@@ -1,7 +1,5 @@
 ExUnit.start()
 
-Application.ensure_all_started(:load_resource)
-
 # Include any test files from the support directory.
 Enum.map File.ls!("test/support"), fn(file) ->
   if Regex.match?(~r/\.exs$/, file) do
