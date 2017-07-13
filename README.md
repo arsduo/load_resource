@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/arsduo/load_resource.svg?branch=master)](https://travis-ci.org/arsduo/load_resource)
+
 _A lightweight, flexible plug for loading and validating resources._
 
 If you've written a web application, you've almost certainly run into this scenario: a user requests a resource and you need to make sure that they can access it. It could be students and essays, customers and orders, books and quotes, whatever. It's a universal need.
@@ -136,11 +138,16 @@ this project you agree to abide by its terms. See
 ### Docker Setup
 
 LoadResource uses Docker to ensure a consistent development environment. Once you have [Docker
-installed](https://docs.docker.com/engine/installation/), just run `docker-compose run
-load_resource bash`. This will compile the environment and put you in a bash shell in which you can
-run `mix test`, access `iex`, etc.
+installed](https://docs.docker.com/engine/installation/), run
+
+1. `docker-compose run load_resource bash`
+2. (in the Docker environment) `mix ecto.create && mix ecto.migrate`
+3. `mix test` to run tests
+4. `iex -S mix` to get into a console
 
 Any changes you make to files will show up in the Docker environment automatically, though if you
 change package dependencies or the Docker configuration itself, you'll need to exit Docker and run
 `docker-compose build` to rebuild the image.
 
+Currently the database isn't persisted across sessions; this will be fixed in the future (want to
+write a PR?).
