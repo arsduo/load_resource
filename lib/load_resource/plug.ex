@@ -7,19 +7,19 @@ defmodule LoadResource.Plug do
   Load a Book resource using the `id` param on the incoming request:
 
   ```
-  plug LoadResource.Plug, [model: Book, not_found: &MyErrorHandler.not_found/1]
+  plug LoadResource.Plug, [model: Book, handler: &MyErrorHandler.not_found/1]
   ```
 
   Use the `book_id` param instead of `id` (useful when composing multiple resources):
 
   ```
-  plug LoadResource.Plug, [model: Book, id_key: "book_id", not_found: &MyErrorHandler.not_found/1]
+  plug LoadResource.Plug, [model: Book, id_key: "book_id", handler: &MyErrorHandler.not_found/1]
   ```
 
   Load a Quote that matches to a previously loaded Book:
 
   ```
-  plug LoadResource.Plug, [model: Quote, scopes: [:book], not_found: &MyErrorHandler.not_found/1]
+  plug LoadResource.Plug, [model: Quote, scopes: [:book], handler: &MyErrorHandler.not_found/1]
   ```
 
   (See `LoadResource.Scope` for more information on scopes.)
@@ -27,7 +27,7 @@ defmodule LoadResource.Plug do
   ## Accepted Options
 
   * `model`: an Ecto model representing the resource you want to load (required)
-  * `not_found`: a function/1 that gets called if the record can't be found and `required: true` (required)
+  * `handler`: a function/1 that gets called if the record can't be found and `required: true` (required)
   * `id_key`: what param in the incoming request represents the ID of the record (optional, default: "id")
   * `required`: whether to halt the plug pipeline and return an error response if the record can't be found (optional, default: true)
   * `scopes`: an list of atoms and/or `LoadResource.Scope` structs (optional, default: [])
@@ -36,8 +36,6 @@ defmodule LoadResource.Plug do
   import Plug.Conn
 
   alias LoadResource.Scope
-
-  @repo Application.get_env(:load_resource, :repo)
 
   @doc """
   Initialize the plug with any options provided in the controller or pipeline, including calculating the resource_name (which key will written to in `conn.assigns`) from the model.
@@ -68,10 +66,8 @@ defmodule LoadResource.Plug do
     }
     scopes = options[:scopes] || []
 
-    query = LoadResource.QueryBuilder.build(model, conn, [id_scope] ++ scopes)
-
-    query
-    |> @repo.one
+    LoadResource.QueryBuilder.build(model, conn, [id_scope] ++ scopes)
+    |> repo().one
     |> handle_resource(conn, options)
   end
 
@@ -88,4 +84,9 @@ defmodule LoadResource.Plug do
   defp handle_resource(resource, conn, %{resource_name: resource_name}) do
     assign(conn, resource_name, resource)
   end
+
+  defp repo() do
+    Application.get_env(:load_resource, :repo)
+  end
+
 end
