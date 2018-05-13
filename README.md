@@ -47,7 +47,7 @@ Let's take our book example from above:
 plug LoadResource.Plug, [model: Book, not_found: &MyErrorHandler.not_found/1]
 ```
 
-Bam! That's all you need. If the `id` param of the incoming request matches a book in the `books` table, it will be available to your controller as `conn.assigns[:book]`; if not, it'll halt the request and pass `conn` over to your error handler to customize the error response.
+Bam! That's all you need. If the `id` param of the incoming request matches a book in the `books` table, it will be available to your controller as `conn.assigns[:book]`; if not, it'll halt the request and pass `conn` over to your error handler to customize the error response. (Note: the handler method can't be private, since it's called by LoadResource.)
 
 ### Nested Resources
 

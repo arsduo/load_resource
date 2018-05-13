@@ -66,9 +66,7 @@ defmodule LoadResource.Plug do
     }
     scopes = options[:scopes] || []
 
-    query = LoadResource.QueryBuilder.build(model, conn, [id_scope] ++ scopes)
-
-    query
+    LoadResource.QueryBuilder.build(model, conn, [id_scope] ++ scopes)
     |> repo().one
     |> handle_resource(conn, options)
   end
