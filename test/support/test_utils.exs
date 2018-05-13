@@ -1,4 +1,6 @@
-defmodule TestHelper do
+# This is a script rather than a compiled file so that it can use ExUnit.Case, which requires
+# ExUnit to be started first.
+defmodule LoadResource.TestUtils do
   use ExUnit.Case, async: true
   use Plug.Test
 

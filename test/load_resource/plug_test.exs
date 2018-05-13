@@ -4,9 +4,10 @@ defmodule LoadResource.PlugTest do
   use ExUnit.Case, async: true
   use Plug.Test
 
-  import TestHelper
+  import LoadResource.TestUtils
 
   alias LoadResource.Scope
+  alias LoadResource.TestModel
 
   @default_opts [model: TestModel, handler: &TestErrorHandler.not_found/1]
 

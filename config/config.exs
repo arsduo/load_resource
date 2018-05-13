@@ -18,4 +18,6 @@ config :load_resource, TestRepo,
   username: System.get_env("PG_USER"),
   password: System.get_env("PG_PASS"),
   database: "load_resource_db",
+  # allow use of the test migration in the command line for development/IEx
+  priv: "test/support",
   pool_size: 10

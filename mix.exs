@@ -11,7 +11,7 @@ defmodule LoadResource.Mixfile do
       package: package(),
       deps: deps(),
 
-      elixirc_paths: ["lib"],
+      elixirc_paths: elixirc_paths(Mix.env),
 
       # Docs
       name: "LoadResource",
@@ -26,7 +26,7 @@ defmodule LoadResource.Mixfile do
   end
 
   def application do
-    []
+    [mod: {LoadResource, []}]
   end
 
   defp deps do
@@ -55,4 +55,7 @@ defmodule LoadResource.Mixfile do
       links: %{"GitHub" => "https://github.com/arsduo/load_resource"}
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support", "test/support/migrations"]
+  defp elixirc_paths(_), do: ["lib"]
 end

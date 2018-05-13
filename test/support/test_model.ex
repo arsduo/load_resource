@@ -1,4 +1,4 @@
-defmodule TestModel do
+defmodule LoadResource.TestModel do
   use Ecto.Schema
 
   schema "books" do

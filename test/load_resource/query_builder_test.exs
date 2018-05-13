@@ -5,9 +5,10 @@ defmodule LoadResource.QueryBuilderTest do
 
   alias LoadResource.QueryBuilder
   alias LoadResource.Scope
+  alias LoadResource.TestModel
 
   import Ecto.Query
-  import TestHelper
+  import LoadResource.TestUtils
 
   describe "build" do
     test "will add an atom scope" do
