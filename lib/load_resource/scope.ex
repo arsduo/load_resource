@@ -4,12 +4,16 @@ defmodule LoadResource.Scope do
 
   A simple example: we have books and citations. When loading a citation, we want to validate that it belongs to a valid book -- that is, to add `citation.book_id = ${valid_book_id}` to our SQL query.
 
-  Scopes contain two attributes:
+  Scopes contain
 
   * `column`: the column on the resource to check
-  * `value`: a function/1 that accepts `conn` and returns a value (see below)
 
-  The value returned by `value` can be either:
+  And one of
+
+  * `scope_key`: an atom representing a value stores on `conn.assigns`
+  * `value`: a remote (e.g. NOT anonymous) function/1 that accepts `conn` and returns a value
+
+  The value returned by `value` / retrieved from conn.assigns can be either:
 
   * a primitive (atom, string, number, or boolean), in which case it is used in the SQL query
   * a map or struct containing an `:id` key, in which case the id value is used
@@ -62,12 +66,12 @@ defmodule LoadResource.Scope do
   `Scope.evaluate(scope)` will return "foo".
   ```
   """
-  def evaluate(%Scope{value: value}, conn) do
-    process_scope_value(value.(conn))
+  def evaluate(%Scope{scope_key: scope_key}, conn) do
+    process_scope_value(conn.assigns[scope_key])
   end
 
-  def evaluate(%Scope{scope_key: scope_key}, conn) do
-    conn.assigns[scope_key]
+  def evaluate(%Scope{value: value}, conn) when is_function(value, 1) do
+    process_scope_value(value.(conn))
   end
 
   defp process_scope_value(value) when is_atom(value), do: value
