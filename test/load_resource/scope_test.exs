@@ -20,7 +20,7 @@ defmodule LoadResource.ScopeTest do
       conn = %{assigns: %{book: book}}
 
       scope = Scope.from_atom(:book)
-      assert scope.value.(conn) == book
+      assert scope.scope_key == :book
     end
   end
 

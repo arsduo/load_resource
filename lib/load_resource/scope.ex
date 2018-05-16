@@ -17,20 +17,20 @@ defmodule LoadResource.Scope do
   Any other value will result in an `LoadResource.Scope.UnprocessableValueError` being raised.
   """
 
-  @enforce_keys [:column, :value]
-  defstruct [:column, :value]
+  @enforce_keys [:column]
+  defstruct [:column, :value, :scope_key]
 
   alias LoadResource.Scope
 
   @doc """
   A convenience method for creating scopes for earlier loaded resources.
 
-  `Scope.from_atom(:book)` is equivalent to writing:
+  `Scope.from_atom(:book)` is equivalent (though not identical) to writing:
 
   ```
   %Scope{
     column: :book_id,
-    value: fn(conn) -> conn.assigns[:book]
+    value: fn(conn, scope_key) -> conn.assigns[:book]
   }
   ```
 
@@ -41,7 +41,10 @@ defmodule LoadResource.Scope do
   def from_atom(scope_key) when is_atom(scope_key) do
     %Scope{
       column: :"#{scope_key}_id",
-      value: fn(conn) -> conn.assigns[scope_key] end
+      # it would be nice to just pass in an anonymous function, but that doesn't actually work --
+      # when Elixir tries to serialize the value as part of plug setup, it chokes on the anonymous
+      # function
+      scope_key: scope_key
     }
   end
 
@@ -61,6 +64,10 @@ defmodule LoadResource.Scope do
   """
   def evaluate(%Scope{value: value}, conn) do
     process_scope_value(value.(conn))
+  end
+
+  def evaluate(%Scope{scope_key: scope_key}, conn) do
+    conn.assigns[scope_key]
   end
 
   defp process_scope_value(value) when is_atom(value), do: value
