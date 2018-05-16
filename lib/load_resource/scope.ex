@@ -66,12 +66,12 @@ defmodule LoadResource.Scope do
   `Scope.evaluate(scope)` will return "foo".
   ```
   """
-  def evaluate(%Scope{scope_key: scope_key}, conn) do
-    process_scope_value(conn.assigns[scope_key])
-  end
-
   def evaluate(%Scope{value: value}, conn) when is_function(value, 1) do
     process_scope_value(value.(conn))
+  end
+
+  def evaluate(%Scope{scope_key: scope_key}, conn) when is_atom(scope_key) do
+    process_scope_value(conn.assigns[scope_key])
   end
 
   defp process_scope_value(value) when is_atom(value), do: value

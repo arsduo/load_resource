@@ -9,6 +9,10 @@ defmodule LoadResource.QueryBuilderTest do
   import Ecto.Query
   import TestHelper
 
+  def scope_test(conn) do
+    conn.params[:book_type]
+  end
+
   describe "build" do
     test "will add an atom scope" do
       scope = :book
@@ -18,8 +22,8 @@ defmodule LoadResource.QueryBuilderTest do
       assert_query_equality(QueryBuilder.build(TestModel, conn, [scope]), expected_query)
     end
 
-    test "will layer multiple scopes" do
-      scope = %Scope{column: :book_type, value: fn(conn) -> conn.params[:book_type] end}
+    test "will support complex scopes" do
+      scope = %Scope{column: :book_type, value: &LoadResource.QueryBuilderTest.scope_test/1}
       conn = %{params: %{book_type: "novel"}}
 
       expected_query = from row in TestModel, where: ^[{:book_type, "novel"}]
@@ -28,7 +32,7 @@ defmodule LoadResource.QueryBuilderTest do
 
     test "layers multiple queries together" do
       scope = :book
-      second_scope = %Scope{column: :book_type, value: fn(conn) -> conn.params[:book_type] end}
+      second_scope = %Scope{column: :book_type, value: &LoadResource.QueryBuilderTest.scope_test/1}
       conn = %{assigns: %{book: %{id: 1234}}, params: %{book_type: "novel"}}
 
       expected_query = from row in TestModel, where: ^[{:book_id, 1234}], where: ^[{:book_type, "novel"}]
