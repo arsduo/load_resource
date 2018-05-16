@@ -4,12 +4,16 @@ defmodule LoadResource.Scope do
 
   A simple example: we have books and citations. When loading a citation, we want to validate that it belongs to a valid book -- that is, to add `citation.book_id = ${valid_book_id}` to our SQL query.
 
-  Scopes contain two attributes:
+  Scopes contain
 
   * `column`: the column on the resource to check
-  * `value`: a function/1 that accepts `conn` and returns a value (see below)
 
-  The value returned by `value` can be either:
+  And one of
+
+  * `scope_key`: an atom representing a value stores on `conn.assigns`
+  * `value`: a remote (e.g. NOT anonymous) function/1 that accepts `conn` and returns a value
+
+  The value returned by `value` / retrieved from conn.assigns can be either:
 
   * a primitive (atom, string, number, or boolean), in which case it is used in the SQL query
   * a map or struct containing an `:id` key, in which case the id value is used
@@ -17,20 +21,20 @@ defmodule LoadResource.Scope do
   Any other value will result in an `LoadResource.Scope.UnprocessableValueError` being raised.
   """
 
-  @enforce_keys [:column, :value]
-  defstruct [:column, :value]
+  @enforce_keys [:column]
+  defstruct [:column, :value, :scope_key]
 
   alias LoadResource.Scope
 
   @doc """
   A convenience method for creating scopes for earlier loaded resources.
 
-  `Scope.from_atom(:book)` is equivalent to writing:
+  `Scope.from_atom(:book)` is equivalent (though not identical) to writing:
 
   ```
   %Scope{
     column: :book_id,
-    value: fn(conn) -> conn.assigns[:book]
+    value: fn(conn, scope_key) -> conn.assigns[:book]
   }
   ```
 
@@ -41,7 +45,10 @@ defmodule LoadResource.Scope do
   def from_atom(scope_key) when is_atom(scope_key) do
     %Scope{
       column: :"#{scope_key}_id",
-      value: fn(conn) -> conn.assigns[scope_key] end
+      # it would be nice to just pass in an anonymous function, but that doesn't actually work --
+      # when Elixir tries to serialize the value as part of plug setup, it chokes on the anonymous
+      # function
+      scope_key: scope_key
     }
   end
 
@@ -59,8 +66,12 @@ defmodule LoadResource.Scope do
   `Scope.evaluate(scope)` will return "foo".
   ```
   """
-  def evaluate(%Scope{value: value}, conn) do
+  def evaluate(%Scope{value: value}, conn) when is_function(value, 1) do
     process_scope_value(value.(conn))
+  end
+
+  def evaluate(%Scope{scope_key: scope_key}, conn) when is_atom(scope_key) do
+    process_scope_value(conn.assigns[scope_key])
   end
 
   defp process_scope_value(value) when is_atom(value), do: value
