@@ -30,6 +30,7 @@ defmodule LoadResource.Plug do
   * `handler`: a function/1 that gets called if the record can't be found and `required: true` (required)
   * `id_key`: what param in the incoming request represents the ID of the record (optional, default: "id")
   * `required`: whether to halt the plug pipeline and return an error response if the record can't be found (optional, default: true)
+  * `resource_name`: under what value to store the resource in `conn.assigns` (optional, default: derived from the model)
   * `scopes`: an list of atoms and/or `LoadResource.Scope` structs (optional, default: [])
   """
 

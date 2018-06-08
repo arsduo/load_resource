@@ -21,7 +21,7 @@ LoadResource makes that easy for Phoenix apps and any other Elixir projects usin
 * Lightweight: no dependencies beyond Ecto
 * Flexible: straightforward options make it easy to handle many common cases
 * Tested: fully tested in ExUnit and linted by [Credo](https://github.com/rrrene/credo)
-* Documented: [fully documented on hex.pm](https://hexdocs.pm/load_resource/0.1.0)
+* Documented: [fully documented on hex.pm](https://hexdocs.pm/load_resource/0.4.0)
 
 Feedback or pull requests for additional configuration very welcome! See below.
 
@@ -109,6 +109,8 @@ LoadResource.Plug takes the following options:
 * `not_found`: a function/1 that gets called if the record can't be found and `required: true` (required)
 * `id_key`: what param in the incoming request represents the ID of the record (optional, default: "id")
 * `required`: whether to halt the plug pipeline and return an error response if the record can't be found (optional, default: true)
+* `resource_name`: under what value to store the resource in `conn.assigns` (optional, default:
+  derived from the model)
 * `scopes`: an list of` :atom`s and/or `Scope`s as described above (optional, default: [])
 
 ## Known Limitations

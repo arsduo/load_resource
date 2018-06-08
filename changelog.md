@@ -1,3 +1,9 @@
+0.4.0
+======
+
+* [New feature] The :resource_name key can be specified to control the key a resource is assigned
+  to in conn.assigns.
+
 0.3.0
 =======
 
