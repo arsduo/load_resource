@@ -49,7 +49,7 @@ defmodule LoadResource.Plug do
     # It's safe to use Macro.underscore here because we know the text only contains characters
     # valid for Elixir identifiers. (See https://hexdocs.pm/elixir/Macro.html#underscore/1.)
     model = Map.fetch!(options, :model)
-    resource_name = String.to_atom(Macro.underscore(List.last(String.split(to_string(model), "."))))
+    resource_name = options[:resource_name] || String.to_atom(Macro.underscore(List.last(String.split(to_string(model), "."))))
 
     Map.put(options, :resource_name, resource_name)
   end
@@ -82,6 +82,7 @@ defmodule LoadResource.Plug do
   end
 
   defp handle_resource(resource, conn, %{resource_name: resource_name}) do
+    IO.puts "Assigning #{resource_name} #{resource.id}"
     assign(conn, resource_name, resource)
   end
 
