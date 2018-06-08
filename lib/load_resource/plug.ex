@@ -83,7 +83,6 @@ defmodule LoadResource.Plug do
   end
 
   defp handle_resource(resource, conn, %{resource_name: resource_name}) do
-    IO.puts "Assigning #{resource_name} #{resource.id}"
     assign(conn, resource_name, resource)
   end
 

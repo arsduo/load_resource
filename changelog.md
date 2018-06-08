@@ -1,3 +1,8 @@
+0.4.1
+======
+
+* [Fix] Remove accidental IO statement
+
 0.4.0
 ======
 
