@@ -30,6 +30,7 @@ defmodule LoadResource.Plug do
   * `handler`: a function/1 that gets called if the record can't be found and `required: true` (required)
   * `id_key`: what param in the incoming request represents the ID of the record (optional, default: "id")
   * `required`: whether to halt the plug pipeline and return an error response if the record can't be found (optional, default: true)
+  * `resource_name`: under what value to store the resource in `conn.assigns` (optional, default: derived from the model)
   * `scopes`: an list of atoms and/or `LoadResource.Scope` structs (optional, default: [])
   """
 
@@ -49,7 +50,7 @@ defmodule LoadResource.Plug do
     # It's safe to use Macro.underscore here because we know the text only contains characters
     # valid for Elixir identifiers. (See https://hexdocs.pm/elixir/Macro.html#underscore/1.)
     model = Map.fetch!(options, :model)
-    resource_name = String.to_atom(Macro.underscore(List.last(String.split(to_string(model), "."))))
+    resource_name = options[:resource_name] || String.to_atom(Macro.underscore(List.last(String.split(to_string(model), "."))))
 
     Map.put(options, :resource_name, resource_name)
   end
@@ -82,6 +83,7 @@ defmodule LoadResource.Plug do
   end
 
   defp handle_resource(resource, conn, %{resource_name: resource_name}) do
+    IO.puts "Assigning #{resource_name} #{resource.id}"
     assign(conn, resource_name, resource)
   end
 

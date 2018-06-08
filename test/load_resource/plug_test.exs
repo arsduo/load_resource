@@ -27,6 +27,16 @@ defmodule LoadResource.PlugTest do
       }
     end
 
+    test "allows you to override the resource_name" do
+      opts = LoadResource.Plug.init(@default_opts ++ [resource_name: "foobar"])
+      assert opts == %{
+        model: TestModel,
+        resource_name: "foobar",
+        handler: &TestErrorHandler.not_found/1,
+        required: true
+      }
+    end
+
     test "it raises an error if model isn't provided" do
       assert_raise KeyError, fn ->
         LoadResource.Plug.init([])
